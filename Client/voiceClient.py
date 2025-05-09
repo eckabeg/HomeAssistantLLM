@@ -38,7 +38,7 @@ def preprocess_audio(file_path):
 
 def transcribe_audio(file_path):
     processed_path = preprocess_audio(file_path)
-    segments, _ = whisper_model.transcribe(processed_path)
+    segments, _ = whisper_model.transcribe(processed_path, task="translate")
     os.remove(processed_path)
     return " ".join([s.text.strip() for s in segments])
 
