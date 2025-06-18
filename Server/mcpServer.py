@@ -1,6 +1,5 @@
-from fastmcp import FastMCP
-import os
 import requests
+from fastmcp import FastMCP
 
 HASS_URL = "http://192.168.178.29:8123"
 HASS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI4Yzg3NmE3ZWJmOWU0ZDc2YTkxMDg5OTZlYjNlOWYxNSIsImlhdCI6MTc0Njc4MTU3NCwiZXhwIjoyMDYyMTQxNTc0fQ.odURYTbRy1aU1GmUqZgUET_lNhX4rUSeUYjHBD1qZVM"
@@ -24,7 +23,7 @@ def turn_on_light(entity_id: str) -> str:
     payload = {"entity_id": entity_id}
     response = requests.post(url, json=payload, headers=HEADERS)
     if response.status_code == 200:
-        return f"LIght {entity_id} turned on."
+        return f"Light {entity_id} turned on."
     else:
         return f"Error turning on light {entity_id}: {response.text}"
 

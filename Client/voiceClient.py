@@ -16,9 +16,9 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_ollama import ChatOllama
 
 # === CONFIG ===
-ACCESS_KEY = "xFRSB4+mC1Fp6Hwh3+u+cg5VZqLXP+jpfl8qN/P7C8c0MlJmIy5ACg=="  # dein Porcupine-Access-Key
-HOTWORD = "jarvis"   # das Porcupine-Keyword
-MCP_NAMESPACE = "HomeAssistant" # Namespace, den du im MCP-Server ("mcpServer.py") definiert hast
+ACCESS_KEY = "xFRSB4+mC1Fp6Hwh3+u+cg5VZqLXP+jpfl8qN/P7C8c0MlJmIy5ACg=="
+HOTWORD = "jarvis"
+MCP_NAMESPACE = "HomeAssistant"
 SAMPLERATE = 16000
 CHANNELS = 1
 
@@ -61,7 +61,7 @@ def listen_for_hotword():
         pcm = indata[:, 0].copy()
         keyword_index = porcupine.process(pcm)
         if keyword_index >= 0:
-            print("✅ Hotword erkannt!")
+            print("Hotword erkannt!")
             raise sd.CallbackAbort
 
     with sd.RawInputStream(
@@ -71,7 +71,7 @@ def listen_for_hotword():
         channels=CHANNELS,
         callback=callback
     ):
-        print("🎙 Warte auf Wake Word …")
+        print("Warte auf Wake Word …")
         while True:
             time.sleep(0.1)  # keep loop alive
 
@@ -82,7 +82,7 @@ def record_until_silence(filename="voice_command.wav", timeout=3, threshold_sec=
     Speichert in WAV, führt per Silero VAD eine Prüfung durch und
     gibt den Dateinamen zurück, falls Sprachaktivität erkannt wurde.
     """
-    print("🎤 Aufnahme gestartet. Bitte sprechen …")
+    print("Aufnahme gestartet. Bitte sprechen …")
     audio_frames = []
     start_time = time.time()
 
@@ -104,10 +104,10 @@ def record_until_silence(filename="voice_command.wav", timeout=3, threshold_sec=
     speech_ts = get_speech_ts(wav, model, sampling_rate=SAMPLERATE)
 
     if speech_ts:
-        print("✅ Sprachaktivität erkannt.")
+        print("Sprachaktivität erkannt.")
         return filename
     else:
-        print("🛑 Keine Sprache erkannt. Versuche erneut …")
+        print("Keine Sprache erkannt. Versuche erneut …")
         return None
 
 
@@ -116,7 +116,7 @@ def transcribe_local_whisper(filepath):
     """
     Nutzt Whisper (lokal) um die WAV-Datei zu transkribieren.
     """
-    whisper_model = whisper.load_model("small")  # "small" oder "medium" je nach GPU/CPU
+    whisper_model = whisper.load_model("medium")
     result = whisper_model.transcribe(filepath)
     text = result["text"].strip()
     print("Erkannt (Whisper):", text)
@@ -132,7 +132,7 @@ async def init_agent():
     client = MultiServerMCPClient({
         MCP_NAMESPACE: {
             "command": "python",
-            "args": ["./mcpServer.py"],  # Pfad zu deinem MCP-Server-Skript
+            "args": ["./mcpServer.py"],
             "transport": "stdio",
         }
     })
@@ -140,8 +140,8 @@ async def init_agent():
     tools = await client.get_tools()
 
     llm = ChatOllama(
-        model="llama3.1",                # passe an, welches Modell du via ollama pull geladen hast
-        base_url="http://127.0.0.1:11434" # Standardport deines Ollama-Servers
+        model="llama3.1",
+        base_url="http://127.0.0.1:11434"
     )
 
     agent = create_react_agent(llm, tools)
@@ -186,7 +186,7 @@ def main_loop(agent):
             print("Beende Voice-Client.")
             break
         except Exception as e:
-            print("Fehler im Haupt­loop:", e)
+            print("Fehler im Hauptloop:", e)
             # Bei einem Fehler einfach zum nächsten Hotword zurückkehren
             continue
 
