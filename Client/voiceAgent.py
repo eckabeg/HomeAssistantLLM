@@ -1,19 +1,16 @@
 import asyncio
-import struct
 import time
-import requests
-import torch
-import torchaudio
+
+import numpy as np
 import pvporcupine
 import pyttsx3
-import sounddevice as sd
-import numpy as np
 import scipy.io.wavfile as wavfile
+import sounddevice as sd
+import torch
 import whisper
-
-from langgraph.prebuilt import create_react_agent
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_ollama import ChatOllama
+from langgraph.prebuilt import create_react_agent
 
 # === CONFIG ===
 ACCESS_KEY = "xFRSB4+mC1Fp6Hwh3+u+cg5VZqLXP+jpfl8qN/P7C8c0MlJmIy5ACg=="
