@@ -21,9 +21,6 @@ export default function FloorPlan() {
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
 
-            console.log("websocket")
-            console.log(data)
-
             if (data.type === 'TURN_ON') {
                 if (data.payload.value.entity_id.includes("living_room")) {
                     setIntensity(setLivingRoomIntensity)
