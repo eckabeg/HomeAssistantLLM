@@ -2,7 +2,7 @@ import requests
 from fastmcp import FastMCP
 
 HASS_URL = "http://localhost:9090"
-HASS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI4Yzg3NmE3ZWJmOWU0ZDc2YTkxMDg5OTZlYjNlOWYxNSIsImlhdCI6MTc0Njc4MTU3NCwiZXhwIjoyMDYyMTQxNTc0fQ.odURYTbRy1aU1GmUqZgUET_lNhX4rUSeUYjHBD1qZVM"
+HASS_TOKEN = ""
 HEADERS = {
     "Authorization": f"Bearer {HASS_TOKEN}",
     "Content-Type": "application/json"

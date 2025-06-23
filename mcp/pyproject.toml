@@ -16,6 +16,7 @@ dependencies = [
     "numpy>=2.2.5",
     "pvporcupine>=3.0.5",
     "pyaudio>=0.2.14",
+    "python-dotenv>=1.1.0",
     "pyttsx3>=2.98",
     "requests>=2.32.3",
     "scipy>=1.15.3",
