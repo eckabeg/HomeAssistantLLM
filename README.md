@@ -39,12 +39,7 @@ python -m venv .venv
 source .venv/bin/activate  # or .venv\Scripts\activate on Windows
 ```
 
-3. **Install dependencies**
-```bash
-pip install -r requirements.txt
-```
-
-4. **Configure environment variables**
+3. **Configure environment variables**
 Create a `.env` file in the root directory with the following:
 ```env
 HASS_URL=http://localhost:8123
