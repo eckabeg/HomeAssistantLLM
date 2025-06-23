@@ -15,7 +15,7 @@ from langgraph.prebuilt import create_react_agent
 import soundfile
 
 # === CONFIG ===
-ACCESS_KEY = "xFRSB4+mC1Fp6Hwh3+u+cg5VZqLXP+jpfl8qN/P7C8c0MlJmIy5ACg=="
+ACCESS_KEY = ""
 HOTWORD = "jarvis"
 MCP_NAMESPACE = "HomeAssistant"
 SAMPLERATE = 16000
