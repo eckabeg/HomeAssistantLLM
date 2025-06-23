@@ -3,6 +3,7 @@ const WebSocket = require('ws');
 const http = require('http');
 
 const app = express();
+app.use(express.json());
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server});
 
@@ -18,8 +19,8 @@ wss.on('connection', ws => {
 });
 
 // HTTP endpoint to trigger message
-app.get('/api/services/light/turn_on', (req, res) => {
-    const message = { type: 'UPDATE_STATE', payload: { value: 'Triggered from /send' } };
+app.post('/api/services/light/turn_on', (req, res) => {
+    const message = { type: 'TURN_ON', payload: { value: req.body } };
     sockets.forEach(ws => {
         if (ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify(message));
@@ -28,8 +29,8 @@ app.get('/api/services/light/turn_on', (req, res) => {
     res.send('Message sent to clients');
 });
 
-app.get('/api/services/light/turn_off', (req, res) => {
-    const message = { type: 'UPDATE_STATE', payload: { value: 'Triggered from /send' } };
+app.post('/api/services/light/turn_off', (req, res) => {
+    const message = { type: 'TURN_OFF', payload: { value: req.body } };
     sockets.forEach(ws => {
         if (ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify(message));
@@ -38,8 +39,8 @@ app.get('/api/services/light/turn_off', (req, res) => {
     res.send('Message sent to clients');
 });
 
-app.get('/api/services/climate/set_temperature', (req, res) => {
-    const message = { type: 'UPDATE_STATE', payload: { value: 'Triggered from /send' } };
+app.post('/api/services/climate/set_temperature', (req, res) => {
+    const message = { type: 'SET_TEMPERATURE', payload: { value: req.body } };
     sockets.forEach(ws => {
         if (ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify(message));
@@ -49,5 +50,5 @@ app.get('/api/services/climate/set_temperature', (req, res) => {
 });
 
 server.listen(9090, () => {
-    console.log('Server running at http://localhost:8000');
+    console.log('Server running at http://localhost:9090');
 });

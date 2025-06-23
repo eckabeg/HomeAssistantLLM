@@ -1,7 +1,7 @@
 import requests
 from fastmcp import FastMCP
 
-HASS_URL = "http://localhost:8000"
+HASS_URL = "http://localhost:9090"
 HASS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI4Yzg3NmE3ZWJmOWU0ZDc2YTkxMDg5OTZlYjNlOWYxNSIsImlhdCI6MTc0Njc4MTU3NCwiZXhwIjoyMDYyMTQxNTc0fQ.odURYTbRy1aU1GmUqZgUET_lNhX4rUSeUYjHBD1qZVM"
 HEADERS = {
     "Authorization": f"Bearer {HASS_TOKEN}",
@@ -10,8 +10,21 @@ HEADERS = {
 
 mcp = FastMCP("HomeAssistant")
 
+ROOM_NAME_MAP = {
+    "wohnzimmer": "living_room",
+    "küche": "kitchen",
+    "schlafzimmer": "bedroom",
+    "badezimmer": "bathroom",
+    "büro": "office",
+    "flur": "hallway",
+    "living_room": "living_room",
+    "bedroom": "bedroom",
+    "hallway": "hallway",
+    "bath": "bath",
+}
+
 @mcp.tool()
-def turn_on_light(entity_id: str) -> str:
+async def turn_on_light(entity_id: str) -> str:
     """
     Turns on a light in Home Assistant.
     Parameters:
@@ -19,6 +32,17 @@ def turn_on_light(entity_id: str) -> str:
     Return:
     Status as string.
     """
+
+    # Normalisieren und übersetzen des Raumnamens
+    entity_parts = entity_id.split(".")
+    domain = entity_parts[0]
+    room = entity_parts[1] if len(entity_parts) > 1 else ""
+
+    print(room)
+    room_en = ROOM_NAME_MAP.get(room.lower())
+    print(room_en)
+    entity_id = f"{domain}.{room_en}"
+
     url = f"{HASS_URL}/api/services/light/turn_on"
     payload = {"entity_id": entity_id}
     response = requests.post(url, json=payload, headers=HEADERS)
@@ -28,7 +52,7 @@ def turn_on_light(entity_id: str) -> str:
         return f"Error turning on light {entity_id}: {response.text}"
 
 @mcp.tool()
-def turn_off_light(entity_id: str) -> str:
+async def turn_off_light(entity_id: str) -> str:
     """
     Turns off a light in Home Assistant.
     Parameters:
@@ -36,6 +60,14 @@ def turn_off_light(entity_id: str) -> str:
     Return:
     Status as string.
     """
+    # Normalisieren und übersetzen des Raumnamens
+    entity_parts = entity_id.split(".")
+    domain = entity_parts[0]
+    room = entity_parts[1] if len(entity_parts) > 1 else ""
+
+    room_en = ROOM_NAME_MAP[room.lower()]
+    entity_id = f"{domain}.{room_en}"
+
     url = f"{HASS_URL}/api/services/light/turn_off"
     payload = {"entity_id": entity_id}
     response = requests.post(url, json=payload, headers=HEADERS)
@@ -45,7 +77,7 @@ def turn_off_light(entity_id: str) -> str:
         return f"Error turning off light {entity_id}: {response.text}"
 
 @mcp.tool()
-def set_temperature(entity_id: str, temperature: float) -> str:
+async def set_temperature(entity_id: str, temperature: float) -> str:
     """
     Setting the temperature of a thermostat in Home Assistant.
     Parameter:

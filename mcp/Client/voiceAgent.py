@@ -6,11 +6,13 @@ import pvporcupine
 import pyttsx3
 import scipy.io.wavfile as wavfile
 import sounddevice as sd
+import torchaudio
 import torch
-import whisper
+from faster_whisper import WhisperModel
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_ollama import ChatOllama
 from langgraph.prebuilt import create_react_agent
+import soundfile
 
 # === CONFIG ===
 ACCESS_KEY = "xFRSB4+mC1Fp6Hwh3+u+cg5VZqLXP+jpfl8qN/P7C8c0MlJmIy5ACg=="
@@ -36,6 +38,8 @@ porcupine = pvporcupine.create(access_key=ACCESS_KEY, keywords=[HOTWORD])
 tts_engine = pyttsx3.init()
 tts_engine.setProperty("rate", 170)
 
+whisper_model = WhisperModel("medium", device="cpu")
+
 def speak(text: str):
     """
     Gibt den Text per Konsole und via TTS aus.
@@ -52,14 +56,16 @@ def listen_for_hotword():
     Bricht dann ab (Callback-Abort) und kehrt zurück.
     """
     frame_len = porcupine.frame_length
+    hotword_detected = False
 
     def callback(indata, frames, time_info, status):
         # Porcupine erwartet 16-bit PCM-Samples
-        pcm = indata[:, 0].copy()
+        nonlocal hotword_detected
+        pcm = np.frombuffer(indata, dtype=np.int16)
         keyword_index = porcupine.process(pcm)
         if keyword_index >= 0:
             print("Hotword erkannt!")
-            raise sd.CallbackAbort
+            hotword_detected = True
 
     with sd.RawInputStream(
         samplerate=porcupine.sample_rate,
@@ -69,7 +75,7 @@ def listen_for_hotword():
         callback=callback
     ):
         print("Warte auf Wake Word …")
-        while True:
+        while not hotword_detected:
             time.sleep(0.1)  # keep loop alive
 
 # === Voice Recording mit VAD ===
@@ -85,9 +91,8 @@ def record_until_silence(filename="voice_command.wav", timeout=3, threshold_sec=
 
     with sd.InputStream(samplerate=SAMPLERATE, channels=CHANNELS, dtype='int16') as stream:
         while True:
-            frame, _ = stream.read(int(SAMPLERATE * 0.1))  # 100 ms Blöcke
-            np_frame = np.frombuffer(frame, dtype=np.int16)
-            audio_frames.append(np_frame)
+            audio_block, _ = stream.read(int(SAMPLERATE * 0.1))
+            audio_frames.append(audio_block[:, 0].copy())
 
             # Abbruch, wenn timeout überschritten ist
             if time.time() - start_time > timeout:
@@ -113,9 +118,8 @@ def transcribe_local_whisper(filepath):
     """
     Nutzt Whisper (lokal) um die WAV-Datei zu transkribieren.
     """
-    whisper_model = whisper.load_model("medium")
-    result = whisper_model.transcribe(filepath)
-    text = result["text"].strip()
+    segments, _ = whisper_model.transcribe(filepath)
+    text = " ".join(segment.text for segment in segments)
     print("Erkannt (Whisper):", text)
     return text
 
@@ -127,9 +131,9 @@ async def init_agent():
     erstellt den ReAct-Agenten mit ChatOllama + HA-Tools.
     """
     client = MultiServerMCPClient({
-        MCP_NAMESPACE: {
+        "HomeAssistant": {
             "command": "python",
-            "args": ["./mcpServer.py"],
+            "args": ["./../Server/mcpServer.py"],
             "transport": "stdio",
         }
     })
@@ -137,22 +141,22 @@ async def init_agent():
     tools = await client.get_tools()
 
     llm = ChatOllama(
-        model="llama3.1",
+        model="llama3.1",  # ggf. llama3.1:7b o. Ä., je nachdem, was gepullt wurde
         base_url="http://127.0.0.1:11434"
     )
 
-    agent = create_react_agent(llm, tools)
-    return agent
+    agent_new = create_react_agent(llm, tools)
+    return agent_new
 
 
 # === Haupt-Loop (synchron) ===
-def main_loop(agent):
+async def main_loop(agent):
     """
     Endlosschleife:
       1) Warte auf das Hotword
       2) Aufnahme via VAD
       3) Transkription
-      4) Sende Prompt an Agent (agent.invoke)
+      4) Sende Prompt an Agent (agent.ainvoke)
       5) Sprachausgabe der Antwort
     """
     while True:
@@ -163,21 +167,21 @@ def main_loop(agent):
             # 2) Aufnehmen (bis timeout)
             filepath = None
             while filepath is None:
-                filepath = record_until_silence(timeout=3, threshold_sec=1.5)
+                filepath = record_until_silence(timeout=2, threshold_sec=1.5)
 
             # 3) Transkribieren
             transcript = transcribe_local_whisper(filepath)
 
             # 4) Anfrage an den MCP-Agenten
             #    Wir übermitteln die transkribierte Nutzernachricht
-            response = agent.invoke({
+            response = await agent.ainvoke({
                 "messages": [{"role": "user", "content": transcript}]
             })
             last_msg = response["messages"][-1]  # AIMessage
             answer = last_msg.content
-
+            print(answer)
             # 5) TTS-Ausgabe
-            speak(answer)
+            #speak(answer)
 
         except KeyboardInterrupt:
             print("Beende Voice-Client.")
@@ -195,4 +199,4 @@ if __name__ == "__main__":
     agent = asyncio.run(init_agent())
 
     # Synchronen Haupt-Loop starten
-    main_loop(agent)
+    asyncio.run(main_loop(agent))

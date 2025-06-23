@@ -1,0 +1,21 @@
+[project]
+name = "homeassistantllm"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+    "faster-whisper>=1.1.1",
+    "fastmcp>=2.8.1",
+    "langchain-mcp-adapters>=0.1.7",
+    "langchain-ollama>=0.3.3",
+    "langgraph>=0.4.8",
+    "numpy>=2.3.1",
+    "pvporcupine>=3.0.5",
+    "pyttsx3>=2.98",
+    "scipy>=1.16.0",
+    "sounddevice>=0.5.2",
+    "soundfile>=0.13.1",
+    "torch>=2.7.1",
+    "torchaudio>=2.7.1",
+    "whisper>=1.1.10",
+]

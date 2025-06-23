@@ -7,7 +7,7 @@ from langchain_ollama import ChatOllama
 async def main():
     # 1. MCP-Client definieren und Server starten
     client = MultiServerMCPClient({
-        "test": {
+        "HomeAssistant": {
             "command": "python",
             "args": ["./../Server/mcpServer.py"],
             "transport": "stdio",
@@ -16,6 +16,8 @@ async def main():
 
     # 2. Werkzeuge vom MCP-Server holen (async/Awaiting ist hier korrekt)
     tools = await client.get_tools()
+
+    print(tools)
 
     # 3. Ollama-LLM instanziieren
     llm = ChatOllama(
@@ -27,7 +29,7 @@ async def main():
     agent = create_react_agent(llm, tools)
 
     # 5. Prompt definieren
-    prompt = "Schalte das Licht im Wohnzimmer aus (entity_id = \"light.living_room\"). "
+    prompt = "Schalte das Licht im Wohnzimmer an."
 
     response_async = await agent.ainvoke({
         "messages": [{"role": "user", "content": prompt}]

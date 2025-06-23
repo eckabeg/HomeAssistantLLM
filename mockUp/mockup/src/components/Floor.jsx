@@ -13,20 +13,43 @@ export default function FloorPlan() {
     const [livingRoomIntensity, setLivingRoomIntensity] = useState(0)
     const [kitchenIntensity, setKitchenIntensity] = useState(0)
     const [hallwayIntensity, setHallwayIntensity] = useState(0)
-    const [toiletIntensity, setToiletIntensity] = useState(0)
+    const [bathIntensity, setBathIntensity] = useState(0)
 
     useEffect(() => {
         const ws = new WebSocket('ws://localhost:9090');
 
-        ws.onopen = () => {
-            console.log("connected")
-        }
-
-        console.log("websocket", ws);
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            if (data.type === 'UPDATE_STATE') {
-                setIntensity(setLivingRoomIntensity);
+
+            console.log("websocket")
+            console.log(data)
+
+            if (data.type === 'TURN_ON') {
+                if (data.payload.value.entity_id.includes("living_room")) {
+                    setIntensity(setLivingRoomIntensity)
+                } else if (data.payload.value.entity_id.includes("kitchen")) {
+                    setIntensity(setKitchenIntensity)
+                } else if (data.payload.value.entity_id.includes("hallway")) {
+                    setIntensity(setHallwayIntensity)
+                } else if (data.payload.value.entity_id.includes("bath")) {
+                    setIntensity(setBathIntensity)
+                }
+            }
+
+            if (data.type === 'TURN_OFF') {
+                if (data.payload.value.entity_id.includes("living_room")) {
+                    setIntensity(setLivingRoomIntensity)
+                } else if (data.payload.value.entity_id.includes("kitchen")) {
+                    setIntensity(setKitchenIntensity)
+                } else if (data.payload.value.entity_id.includes("hallway")) {
+                    setIntensity(setHallwayIntensity)
+                } else if (data.payload.value.entity_id.includes("bath")) {
+                    setIntensity(setBathIntensity)
+                }
+            }
+
+            if (data.type === 'SET_TEMPERATURE') {
+
             }
         };
 
@@ -69,7 +92,7 @@ export default function FloorPlan() {
                 <button onClick={() => setIntensity(setLivingRoomIntensity)} className="Light-Button">
                     Living Room
                 </button>
-                <button onClick={()=>setIntensity(setToiletIntensity)} className="Light-Button">Toilet</button>
+                <button onClick={()=>setIntensity(setBathIntensity)} className="Light-Button">Toilet</button>
                 <button onClick={()=>setIntensity(setHallwayIntensity)} className="Light-Button">Hallway</button>
                 <button onClick={()=>setIntensity(setKitchenIntensity)} className="Light-Button">Kitchen</button>
                 <input type="range" onChange={handleTemperatureChange}/>
@@ -112,7 +135,7 @@ export default function FloorPlan() {
                     position={[7,0.1,0]}
                     width={5}
                     height={10}
-                    intensity={toiletIntensity}
+                    intensity={bathIntensity}
                     rotation={[-Math.PI / 2, 0, 0]}
                     color="#ff6beb"
                 />
