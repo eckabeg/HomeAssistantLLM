@@ -51,10 +51,10 @@ Output:
             clean_json = json_match.group(0)
             return json.loads(clean_json)
         else:
-            print("⚠️ No JSON found in model response:", raw_output)
+            print("No JSON found in model response:", raw_output)
             return None
     except Exception as e:
-        print("❌ Error talking to Ollama:", e)
+        print("Error talking to Ollama:", e)
         return None
 
 # === Home Assistant Control ===
@@ -63,7 +63,7 @@ def send_to_home_assistant(command):
     action = command.get("action")
     entity_id = command.get("entity_id")
     if not (domain and action and entity_id):
-        print("❌ Invalid command format:", command)
+        print("Invalid command format:", command)
         return False, "Invalid format"
 
     url = f"{HASS_URL}/api/services/{domain}/{action}"
@@ -74,10 +74,10 @@ def send_to_home_assistant(command):
 
     try:
         r = requests.post(url, headers=HEADERS, json=payload)
-        print(f"✅ Sent {action} to {entity_id}: {r.status_code}")
+        print(f"Sent {action} to {entity_id}: {r.status_code}")
         return r.ok, r.text
     except Exception as e:
-        print("❌ Error communicating with Home Assistant:", e)
+        print("Error communicating with Home Assistant:", e)
         return False, str(e)
 
 # === Main Handler ===
@@ -97,7 +97,7 @@ def handle_request(data):
     success, result = send_to_home_assistant(command)
 
     return {
-        "response": f"✅ Command executed: {command}" if success else "❌ Failed to execute command.",
+        "response": f"Command executed: {command}" if success else "Failed to execute command.",
         "command": command,
         "details": result
     }
