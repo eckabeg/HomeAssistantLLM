@@ -44,10 +44,6 @@ export default function FloorPlan() {
                     setIntensity(setBathIntensity)
                 }
             }
-
-            if (data.type === 'SET_TEMPERATURE') {
-
-            }
         };
 
         return () => ws.close();

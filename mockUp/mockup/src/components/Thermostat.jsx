@@ -16,6 +16,12 @@ export default function Thermostat() {
             if (data.type === 'SET_TEMPERATURE') {
                 if (data.payload.value.entity_id.includes("living_room")) {
                     setThermostatLivingRoom(data.payload.value.temperature)
+                } else if (data.payload.value.entity_id.includes("kitchen")) {
+                    setThermostatKitchen(data.payload.value.temperature)
+                } else if (data.payload.value.entity_id.includes("floor")) {
+                    setThermostatFloor(data.payload.value.temperature)
+                } else if (data.payload.value.entity_id.includes("bath")) {
+                    setThermostatBath(data.payload.value.temperature)
                 }
             }
         };
@@ -24,7 +30,14 @@ export default function Thermostat() {
     }, []);
 
     return (
-        <div>
+        <div
+            style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "20px",
+            }}
+        >
             <div>
                 <p>Thermostat Living Room</p>
                 <p>{thermostatLivingRoom}</p>
